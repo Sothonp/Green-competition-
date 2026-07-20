@@ -212,6 +212,7 @@ function App() {
               journey={journey}
               onCompleteWorld={completeWorld}
               onOpenWorld={openJourney}
+              onDailyCheckin={dailyCheckin}
               showToast={showToast}
             />
           )}
