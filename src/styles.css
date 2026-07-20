@@ -305,6 +305,22 @@ h2, h3 { font-family: 'Manrope'; letter-spacing: -.45px; }
 
 .toast { position: fixed; left: 50%; bottom: 24px; z-index: 100; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; white-space: nowrap; padding: 12px 16px; border-radius: 999px; background: var(--forest); color: white; box-shadow: 0 14px 35px rgba(13,43,31,.3); font-size: 11px; font-weight: 700; }
 
+/* Journey Map styles */
+.journey-row { display: flex; gap: 12px; align-items: center; overflow-x: auto; padding: 8px 0; }
+.world-node { min-width: 120px; flex: 0 0 auto; background: white; border: 1px solid var(--line); border-radius: 16px; padding: 12px; text-align: center; box-shadow: 0 8px 18px rgba(31,67,52,.04); }
+.world-node.locked { opacity: .42; filter: grayscale(.2); }
+.world-icon { width: 56px; height: 56px; display: grid; place-items: center; margin: 0 auto 8px; border-radius: 14px; background: linear-gradient(145deg, #e8faf0, #c6efd9); color: var(--green); font-size: 20px; }
+.world-title { font-weight: 800; font-size: 13px; margin-bottom: 6px; }
+.world-meta { font-size: 11px; color: var(--muted); }
+.badge-pill { display: inline-flex; gap: 8px; align-items: center; padding: 6px 10px; border-radius: 999px; background: #f2fff5; color: #1d6b43; font-weight: 800; font-size: 11px; }
+
+.journey-modal .sheet-hero { height: 130px; }
+.journey-modal .sheet-content { padding-bottom: 40px; }
+
+/* Mini-game placeholder visuals */
+.mini-game { min-height: 240px; display: grid; place-items: center; border-radius: 14px; background: linear-gradient(145deg, #eef9f2, #d6f0df); padding: 20px; margin-bottom: 12px; }
+.journey-row button:active { transform: translateY(2px); }
+
 @media (max-width: 560px) {
   .app-shell { display: block; padding: 0; background: #f7f8f4; }
   .desktop-note { display: none; }

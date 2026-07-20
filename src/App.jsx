@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import {
   ArrowLeft,
   Award,
@@ -100,12 +100,28 @@ const badges = [
   { icon: HeartHandshake, name: 'Community Helper', detail: 'Completed 10 volunteer hours' },
 ];
 
+const worlds = [
+  { id: 1, title: 'Eco Village', xp: 150, badge: 'Eco Starter', icon: Leaf, desc: 'Basics of waste and reuse' },
+  { id: 2, title: 'Recycling Ridge', xp: 200, badge: 'Recycling Ranger', icon: Recycle, desc: 'Sorting & recycling science' },
+  { id: 3, title: 'Ocean Reach', xp: 250, badge: 'Ocean Protector', icon: Sparkles, desc: 'Protecting waterways' },
+  { id: 4, title: 'Community Commons', xp: 300, badge: 'Community Hero', icon: Users, desc: 'Organizing local action' },
+  { id: 5, title: 'Climate Summit', xp: 400, badge: 'Climate Champion', icon: Medal, desc: 'Systems & long-term change' },
+];
+
 function App() {
   const [tab, setTab] = useState('home');
   const [challenge, setChallenge] = useState(null);
   const [missionOpen, setMissionOpen] = useState(false);
   const [missionStep, setMissionStep] = useState(0);
   const [xp, setXp] = useState(1250);
+  const [journey, setJourney] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('green_journey')) || { unlocked: [1], completed: [], badges: [], streak: 0 };
+    } catch (e) {
+      return { unlocked: [1], completed: [], badges: [], streak: 0 };
+    }
+  });
+  const [selectedWorld, setSelectedWorld] = useState(null);
   const [completedMission, setCompletedMission] = useState(false);
   const [toast, setToast] = useState('');
 
@@ -119,6 +135,54 @@ function App() {
     setChallenge(null);
     setMissionStep(completedMission ? 3 : 0);
     setMissionOpen(true);
+  };
+
+  useEffect(() => {
+    try { localStorage.setItem('green_journey', JSON.stringify(journey)); } catch (e) {}
+  }, [journey]);
+
+  const completeWorld = (world) => {
+    if (journey.completed.includes(world.id)) {
+      showToast(`${world.title} already completed`);
+      return;
+    }
+    // award xp and badge, unlock next world
+    setXp((v) => v + (world.xp || 200));
+    setJourney((prev) => {
+      const completed = [...prev.completed, world.id];
+      const unlocked = new Set(prev.unlocked);
+      if (world.id < 5) unlocked.add(world.id + 1);
+      const badges = [...prev.badges, world.badge];
+      const next = { ...prev, completed, unlocked: Array.from(unlocked), badges };
+      return next;
+    });
+    showToast(`World complete — +${world.xp || 200} XP · Badge: ${world.badge}`);
+  };
+
+  const openJourney = (world) => setSelectedWorld(world);
+  const closeJourney = () => setSelectedWorld(null);
+
+  const playMiniGame = (world) => {
+    // placeholder mini-game: immediate success for now, award xp and complete
+    completeWorld(world);
+    closeJourney();
+  };
+
+  const dailyCheckin = () => {
+    try {
+      const raw = localStorage.getItem('green_journey') || '{}';
+      const parsed = JSON.parse(raw) || {};
+      const last = parsed.lastCheckin || null;
+      const today = new Date().toISOString().slice(0, 10);
+      setJourney((prev) => {
+        if (prev.lastCheckin === today) return prev;
+        const streak = prev.lastCheckin === new Date(Date.now() - 86400000).toISOString().slice(0, 10) ? (prev.streak || 0) + 1 : 1;
+        const next = { ...prev, lastCheckin: today, streak };
+        try { localStorage.setItem('green_journey', JSON.stringify(next)); } catch (e) {}
+        showToast(`Checked in · ${streak}-day streak`);
+        return next;
+      });
+    } catch (e) {}
   };
 
   const finishMission = () => {
@@ -145,6 +209,10 @@ function App() {
               onOpenMission={openMission}
               onOpenChallenge={setChallenge}
               onChangeTab={setTab}
+              journey={journey}
+              onCompleteWorld={completeWorld}
+              onOpenWorld={openJourney}
+              showToast={showToast}
             />
           )}
           {tab === 'challenges' && (
@@ -173,6 +241,33 @@ function App() {
           onFinish={finishMission}
           completed={completedMission}
         />
+      )}
+
+      {selectedWorld && (
+        <div className="overlay" onMouseDown={(e) => e.target === e.currentTarget && closeJourney()}>
+          <article className="bottom-sheet journey-modal">
+            <div className="sheet-handle" />
+            <button className="sheet-close" onClick={closeJourney} aria-label="Close"><X size={20} /></button>
+            <div className="sheet-hero">
+              <selectedWorld.icon size={54} />
+              <span>{selectedWorld.title}</span>
+            </div>
+            <div className="sheet-content">
+              <h2>{selectedWorld.title}</h2>
+              <p>{selectedWorld.desc}</p>
+              <div style={{ marginTop: 12 }}>
+                <button className="primary-button full" onClick={() => playMiniGame(selectedWorld)}>
+                  Play mini-game <Play size={18} />
+                </button>
+              </div>
+              <div style={{ marginTop: 12 }}>
+                <button className="primary-button full" onClick={() => { closeJourney(); onCompleteWorld(selectedWorld); }}>
+                  Mark as complete <Check size={18} />
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
       )}
 
       {toast && (
@@ -209,9 +304,34 @@ function Header({ tab, xp }) {
   );
 }
 
-function HomeScreen({ xp, completedMission, onOpenMission, onOpenChallenge, onChangeTab }) {
+function HomeScreen({ xp, completedMission, onOpenMission, onOpenChallenge, onChangeTab, journey, onCompleteWorld, showToast }) {
   return (
     <div className="page-stack">
+      <section>
+        <SectionHeading title="Green Journey" action="Explore" onAction={() => showToast('Open Journey map from Passport')} />
+        <div className="journey-row">
+          {worlds.map((w) => {
+            const locked = !journey.unlocked.includes(w.id);
+            const done = journey.completed.includes(w.id);
+            const Icon = w.icon;
+            return (
+              <button
+                key={w.id}
+                className={`world-node ${locked ? 'locked' : ''}`}
+                onClick={() => {
+                  if (locked) return showToast('Unlock previous world to access');
+                  return onOpenWorld ? onOpenWorld(w) : onCompleteWorld(w);
+                }}
+              >
+                <div className="world-icon"><Icon size={24} /></div>
+                <div className="world-title">{w.title}</div>
+                <div className="world-meta">{w.desc}</div>
+                {done && <div style={{ marginTop: 10 }} className="badge-pill"><BadgeCheck size={14} /> {w.badge}</div>}
+              </button>
+            );
+          })}
+        </div>
+      </section>
       <section className="welcome-card">
         <div className="welcome-copy">
           <p className="eyebrow light">GOOD AFTERNOON</p>
@@ -436,7 +556,7 @@ function PassportScreen({ xp, showToast }) {
       </section>
 
       <section>
-        <SectionHeading title="Achievement badges" action="8 total" />
+        <SectionHeading title="Achievement badges" action="View all" />
         <div className="badge-list">
           {badges.map((badge) => {
             const Icon = badge.icon;
@@ -448,6 +568,14 @@ function PassportScreen({ xp, showToast }) {
               </div>
             );
           })}
+          {/* show earned badges from journey */}
+          {JSON.parse(localStorage.getItem('green_journey') || '{}').badges?.map((b) => (
+            <div className="badge-row" key={b}>
+              <div className="badge-symbol"><Medal size={22} /></div>
+              <div><strong>{b}</strong><span>Earned in your journey</span></div>
+              <ChevronRight size={19} />
+            </div>
+          ))}
         </div>
       </section>
 
