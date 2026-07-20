@@ -305,7 +305,7 @@ function Header({ tab, xp }) {
   );
 }
 
-function HomeScreen({ xp, completedMission, onOpenMission, onOpenChallenge, onChangeTab, journey, onCompleteWorld, showToast }) {
+function HomeScreen({ xp, completedMission, onOpenMission, onOpenChallenge, onChangeTab, journey, onCompleteWorld, onOpenWorld, onDailyCheckin, showToast }) {
   return (
     <div className="page-stack">
       <section>
@@ -368,9 +368,14 @@ function HomeScreen({ xp, completedMission, onOpenMission, onOpenChallenge, onCh
             <span><Zap size={14} fill="currentColor" /> {completedMission ? '150 XP earned' : '+150 XP · 4 minutes'}</span>
           </div>
         </div>
-        <button className="primary-button full" onClick={onOpenMission}>
-          {completedMission ? 'Review mission' : 'Start mission'} <Play size={17} fill="currentColor" />
-        </button>
+        <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+          <button className="primary-button" style={{ flex: 1 }} onClick={onOpenMission}>
+            {completedMission ? 'Review mission' : 'Start mission'} <Play size={17} fill="currentColor" />
+          </button>
+          <button className="checkin-button" onClick={() => onDailyCheckin && onDailyCheckin()}>
+            Check in
+          </button>
+        </div>
       </section>
 
       <section>
