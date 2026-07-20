@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import {
+  ArrowDown,
   ArrowLeft,
   Award,
   BadgeCheck,
@@ -12,15 +13,13 @@ import {
   CircleUserRound,
   Clock3,
   Flame,
-  Gift,
+  Gem,
   GraduationCap,
   HeartHandshake,
   Home,
   Leaf,
   LockKeyhole,
-  MapPin,
   Medal,
-  Play,
   Recycle,
   Search,
   Share2,
@@ -100,12 +99,88 @@ const badges = [
   { icon: HeartHandshake, name: 'Community Helper', detail: 'Completed 10 volunteer hours' },
 ];
 
-const worlds = [
-  { id: 1, title: 'Eco Village', xp: 150, badge: 'Eco Starter', icon: Leaf, desc: 'Basics of waste and reuse' },
-  { id: 2, title: 'Recycling Ridge', xp: 200, badge: 'Recycling Ranger', icon: Recycle, desc: 'Sorting & recycling science' },
-  { id: 3, title: 'Ocean Reach', xp: 250, badge: 'Ocean Protector', icon: Sparkles, desc: 'Protecting waterways' },
-  { id: 4, title: 'Community Commons', xp: 300, badge: 'Community Hero', icon: Users, desc: 'Organizing local action' },
-  { id: 5, title: 'Climate Summit', xp: 400, badge: 'Climate Champion', icon: Medal, desc: 'Systems & long-term change' },
+const roadmapSections = [
+  {
+    id: 1,
+    title: 'Eco Basics',
+    desc: 'Waste, reuse & the 3 Rs',
+    icon: Leaf,
+    tone: 'mint',
+    lessonXp: 40,
+    lessons: [
+      { id: 1, title: 'The 3 Rs', visual: '♻️', question: 'What does the first "R" in Reduce, Reuse, Recycle mean?', answers: ['Buy less to create less waste', 'Sort your trash into bins', 'Throw items away'], correct: 0 },
+      { id: 2, title: 'Sorting Trash', visual: '🍌', question: 'Which bin does a banana peel go into?', answers: ['Recycling', 'Organic waste', 'Hazardous waste'], correct: 1 },
+      { id: 3, title: 'Composting 101', visual: '🌱', question: 'Composting mainly turns food scraps into...', answers: ['Plastic', 'Nutrient-rich soil', 'Clean water'], correct: 1 },
+      { id: 4, title: 'Single-Use Plastic', visual: '🥤', question: 'Which item is single-use plastic?', answers: ['A plastic straw', 'A metal water bottle', 'A cotton tote bag'], correct: 0 },
+      { id: 5, title: 'Recycling Labels', visual: '🔎', question: 'What does the number inside a recycling symbol usually tell you?', answers: ["The item's price", 'The type of plastic resin', 'The manufacture date'], correct: 1 },
+    ],
+    review: {
+      title: 'Eco Basics Review',
+      xp: 120,
+      badge: 'Eco Basics Champion',
+      questions: [
+        { visual: '♻️', question: 'Which action reduces waste the most?', answers: ['Recycling more', 'Buying less in the first place', 'Burning plastic'], correct: 1 },
+        { visual: '🍌', question: 'Food scraps should go in the ___ bin.', answers: ['Organic', 'Recycling', 'Landfill-only'], correct: 0 },
+        { visual: '⏳', question: 'A plastic bottle can take about how long to decompose?', answers: ['5 years', '50 years', '450 years'], correct: 2 },
+      ],
+    },
+  },
+  {
+    id: 2,
+    title: 'Recycling Ranger',
+    desc: 'Sorting & recycling science',
+    icon: Recycle,
+    tone: 'forest',
+    lessonXp: 45,
+    lessons: [
+      { id: 1, title: 'Materials 101', visual: '🥫', question: 'Which material can typically be recycled endlessly without losing quality?', answers: ['Glass & metal', 'Plastic film', 'Styrofoam'], correct: 0 },
+      { id: 2, title: 'Paper & Cardboard', visual: '📦', question: 'Greasy pizza boxes should be...', answers: ['Recycled as-is', 'Composted or trashed, not recycled', 'Burned at home'], correct: 1 },
+      { id: 3, title: 'Contamination', visual: '🚫', question: 'What happens when food waste contaminates a recycling bin?', answers: ['Nothing changes', 'It can spoil the whole batch of recyclables', 'It gets cleaned automatically'], correct: 1 },
+      { id: 4, title: 'E-Waste', visual: '🔋', question: 'Old phones and batteries should be...', answers: ['Thrown in regular trash', 'Taken to an e-waste collection point', 'Buried in the garden'], correct: 1 },
+      { id: 5, title: 'Upcycling', visual: '🔨', question: 'Upcycling means...', answers: ['Throwing items away faster', 'Turning waste into something of higher value', 'Sending waste overseas'], correct: 1 },
+    ],
+    review: {
+      title: 'Recycling Ranger Review',
+      xp: 130,
+      badge: 'Recycling Ranger',
+      questions: [
+        { visual: '🥫', question: 'Which of these is NOT usually recyclable curbside?', answers: ['Cardboard', 'Greasy pizza box', 'Aluminum can'], correct: 1 },
+        { visual: '🔋', question: 'Why should e-waste never go in regular trash?', answers: ['It\'s too heavy', 'It contains toxic materials that can leak', "It's too colorful"], correct: 1 },
+        { visual: '🔨', question: 'Upcycling an old jar into a plant pot is an example of...', answers: ['Reducing', 'Recycling', 'Reusing / upcycling'], correct: 2 },
+      ],
+    },
+  },
+  {
+    id: 3,
+    title: 'Climate Guardian',
+    desc: 'Systems & long-term change',
+    icon: Sparkles,
+    tone: 'blue',
+    lessonXp: 50,
+    lessons: [
+      { id: 1, title: 'Carbon Footprint', visual: '🌍', question: 'A "carbon footprint" measures...', answers: ['Your shoe size', 'The greenhouse gases your actions produce', 'Distance walked'], correct: 1 },
+      { id: 2, title: 'Renewable Energy', visual: '☀️', question: 'Which is a renewable energy source?', answers: ['Coal', 'Solar power', 'Natural gas'], correct: 1 },
+      { id: 3, title: 'Water Conservation', visual: '💧', question: 'A simple way to save water at home is...', answers: ['Leaving the tap running', 'Taking shorter showers', 'Watering plants at noon'], correct: 1 },
+      { id: 4, title: 'Deforestation', visual: '🌳', question: 'Cutting down forests mainly contributes to climate change by...', answers: ['Releasing stored carbon dioxide', 'Cooling the planet', 'Increasing rainfall everywhere'], correct: 0 },
+      { id: 5, title: 'Community Action', visual: '🤝', question: 'What amplifies individual climate action the most?', answers: ['Acting entirely alone', 'Organizing with your community', 'Waiting for others to start'], correct: 1 },
+    ],
+    review: {
+      title: 'Climate Guardian Review',
+      xp: 150,
+      badge: 'Climate Guardian',
+      questions: [
+        { visual: '☀️', question: 'Solar and wind are examples of...', answers: ['Fossil fuels', 'Renewable energy', 'Non-renewable energy'], correct: 1 },
+        { visual: '🌳', question: 'Deforestation increases atmospheric CO2 because trees...', answers: ['Store carbon that gets released when cut', 'Produce plastic', 'Absorb sunlight only'], correct: 0 },
+        { visual: '🤝', question: 'Climate action is most effective when...', answers: ['Only governments act', 'Individuals and communities act together', 'Nobody changes habits'], correct: 1 },
+      ],
+    },
+  },
+];
+
+const roadmapDecor = [
+  [{ e: '🌱', t: 10, l: 82 }, { e: '🌍', t: 44, l: 12 }, { e: '♻️', t: 78, l: 84 }],
+  [{ e: '💧', t: 12, l: 14 }, { e: '🔋', t: 48, l: 86 }, { e: '🧴', t: 82, l: 16 }],
+  [{ e: '☀️', t: 10, l: 84 }, { e: '🌳', t: 46, l: 12 }, { e: '🤝', t: 80, l: 80 }],
 ];
 
 function App() {
@@ -114,14 +189,15 @@ function App() {
   const [missionOpen, setMissionOpen] = useState(false);
   const [missionStep, setMissionStep] = useState(0);
   const [xp, setXp] = useState(1250);
-  const [journey, setJourney] = useState(() => {
+  const [roadmap, setRoadmap] = useState(() => {
+    const fallback = { completedLessons: [], completedReviews: [], badges: [], streak: 0, lastActiveDate: null };
     try {
-      return JSON.parse(localStorage.getItem('green_journey')) || { unlocked: [1], completed: [], badges: [], streak: 0 };
+      return { ...fallback, ...(JSON.parse(localStorage.getItem('greenquest_roadmap')) || {}) };
     } catch (e) {
-      return { unlocked: [1], completed: [], badges: [], streak: 0 };
+      return fallback;
     }
   });
-  const [selectedWorld, setSelectedWorld] = useState(null);
+  const [activeLesson, setActiveLesson] = useState(null);
   const [completedMission, setCompletedMission] = useState(false);
   const [toast, setToast] = useState('');
 
@@ -138,51 +214,67 @@ function App() {
   };
 
   useEffect(() => {
-    try { localStorage.setItem('green_journey', JSON.stringify(journey)); } catch (e) {}
-  }, [journey]);
+    try { localStorage.setItem('greenquest_roadmap', JSON.stringify(roadmap)); } catch (e) {}
+  }, [roadmap]);
 
-  const completeWorld = (world) => {
-    if (journey.completed.includes(world.id)) {
-      showToast(`${world.title} already completed`);
-      return;
+  const lessonKey = (sectionId, lessonId) => `${sectionId}-${lessonId}`;
+  const isLessonDone = (sectionId, lessonId) => roadmap.completedLessons.includes(lessonKey(sectionId, lessonId));
+  const isReviewDone = (sectionId) => roadmap.completedReviews.includes(sectionId);
+  const isSectionUnlocked = (sectionIndex) => sectionIndex === 0 || isReviewDone(roadmapSections[sectionIndex - 1].id);
+  const isLessonUnlocked = (sectionIndex, lessonIndex) => {
+    if (!isSectionUnlocked(sectionIndex)) return false;
+    if (lessonIndex === 0) return true;
+    const section = roadmapSections[sectionIndex];
+    return isLessonDone(section.id, section.lessons[lessonIndex - 1].id);
+  };
+  const isReviewUnlocked = (sectionIndex) => {
+    if (!isSectionUnlocked(sectionIndex)) return false;
+    const section = roadmapSections[sectionIndex];
+    return section.lessons.every((lesson) => isLessonDone(section.id, lesson.id));
+  };
+
+  const openLesson = (sectionIndex, lessonIndex) => {
+    if (!isLessonUnlocked(sectionIndex, lessonIndex)) return showToast('Complete the previous lesson to unlock this one');
+    setActiveLesson({ sectionIndex, lessonIndex, kind: 'lesson' });
+  };
+
+  const openReview = (sectionIndex) => {
+    if (!isReviewUnlocked(sectionIndex)) return showToast('Finish all 5 lessons to unlock the review');
+    setActiveLesson({ sectionIndex, kind: 'review' });
+  };
+
+  const closeLesson = () => setActiveLesson(null);
+
+  const withDailyStreak = (prev) => {
+    const today = new Date().toISOString().slice(0, 10);
+    if (prev.lastActiveDate === today) return prev;
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    const streak = prev.lastActiveDate === yesterday ? (prev.streak || 0) + 1 : 1;
+    return { ...prev, lastActiveDate: today, streak };
+  };
+
+  const completeLesson = (sectionIndex, lessonIndex) => {
+    const section = roadmapSections[sectionIndex];
+    const lesson = section.lessons[lessonIndex];
+    const key = lessonKey(section.id, lesson.id);
+    if (!roadmap.completedLessons.includes(key)) {
+      setXp((v) => v + section.lessonXp);
+      setRoadmap((prev) => withDailyStreak({ ...prev, completedLessons: [...prev.completedLessons, key] }));
     }
-    // award xp and badge, unlock next world
-    setXp((v) => v + (world.xp || 200));
-    setJourney((prev) => {
-      const completed = [...prev.completed, world.id];
-      const unlocked = new Set(prev.unlocked);
-      if (world.id < 5) unlocked.add(world.id + 1);
-      const badges = [...prev.badges, world.badge];
-      const next = { ...prev, completed, unlocked: Array.from(unlocked), badges };
-      return next;
-    });
-    showToast(`World complete — +${world.xp || 200} XP · Badge: ${world.badge}`);
+    showToast(`${lesson.title} complete — +${section.lessonXp} XP`);
   };
 
-  const openJourney = (world) => setSelectedWorld(world);
-  const closeJourney = () => setSelectedWorld(null);
-
-  const playMiniGame = (world) => {
-    // placeholder mini-game: immediate success for now, award xp and complete
-    completeWorld(world);
-    closeJourney();
-  };
-
-  const dailyCheckin = () => {
-    try {
-      const raw = localStorage.getItem('green_journey') || '{}';
-      const parsed = JSON.parse(raw) || {};
-      const last = parsed.lastCheckin || null;
-      const today = new Date().toISOString().slice(0, 10);
-      setJourney((prev) => {
-        if (prev.lastCheckin === today) return prev;
-        const streak = prev.lastCheckin === new Date(Date.now() - 86400000).toISOString().slice(0, 10) ? (prev.streak || 0) + 1 : 1;
-        const next = { ...prev, lastCheckin: today, streak };
-        try { localStorage.setItem('green_journey', JSON.stringify(next)); } catch (e) {}
-        showToast(`Checked in · ${streak}-day streak`);
-        return next;
-      });
-    } catch (e) {}
+  const completeReview = (sectionIndex) => {
+    const section = roadmapSections[sectionIndex];
+    if (!roadmap.completedReviews.includes(section.id)) {
+      setXp((v) => v + section.review.xp);
+      setRoadmap((prev) => withDailyStreak({
+        ...prev,
+        completedReviews: [...prev.completedReviews, section.id],
+        badges: [...prev.badges, section.review.badge],
+      }));
+    }
+    showToast(`${section.title} complete — +${section.review.xp} XP · Badge: ${section.review.badge}`);
   };
 
   const finishMission = () => {
@@ -199,21 +291,19 @@ function App() {
       </div>
 
       <main className="phone-app">
-        <Header tab={tab} xp={xp} />
+        <Header tab={tab} xp={xp} streak={roadmap.streak || 0} />
 
         <section className="screen" aria-live="polite">
           {tab === 'home' && (
-            <HomeScreen
-              xp={xp}
-              completedMission={completedMission}
-              onOpenMission={openMission}
-              onOpenChallenge={setChallenge}
-              onChangeTab={setTab}
-              journey={journey}
-              onCompleteWorld={completeWorld}
-              onOpenWorld={openJourney}
-              onDailyCheckin={dailyCheckin}
-              showToast={showToast}
+            <RoadmapScreen
+              roadmap={roadmap}
+              isLessonUnlocked={isLessonUnlocked}
+              isLessonDone={isLessonDone}
+              isReviewUnlocked={isReviewUnlocked}
+              isReviewDone={isReviewDone}
+              isSectionUnlocked={isSectionUnlocked}
+              onOpenLesson={openLesson}
+              onOpenReview={openReview}
             />
           )}
           {tab === 'challenges' && (
@@ -244,31 +334,15 @@ function App() {
         />
       )}
 
-      {selectedWorld && (
-        <div className="overlay" onMouseDown={(e) => e.target === e.currentTarget && closeJourney()}>
-          <article className="bottom-sheet journey-modal">
-            <div className="sheet-handle" />
-            <button className="sheet-close" onClick={closeJourney} aria-label="Close"><X size={20} /></button>
-            <div className="sheet-hero">
-              <selectedWorld.icon size={54} />
-              <span>{selectedWorld.title}</span>
-            </div>
-            <div className="sheet-content">
-              <h2>{selectedWorld.title}</h2>
-              <p>{selectedWorld.desc}</p>
-              <div style={{ marginTop: 12 }}>
-                <button className="primary-button full" onClick={() => playMiniGame(selectedWorld)}>
-                  Play mini-game <Play size={18} />
-                </button>
-              </div>
-              <div style={{ marginTop: 12 }}>
-                <button className="primary-button full" onClick={() => { closeJourney(); onCompleteWorld(selectedWorld); }}>
-                  Mark as complete <Check size={18} />
-                </button>
-              </div>
-            </div>
-          </article>
-        </div>
+      {activeLesson && (
+        <LessonFlow
+          section={roadmapSections[activeLesson.sectionIndex]}
+          kind={activeLesson.kind}
+          lessonIndex={activeLesson.lessonIndex}
+          onClose={closeLesson}
+          onFinishLesson={() => { completeLesson(activeLesson.sectionIndex, activeLesson.lessonIndex); closeLesson(); }}
+          onFinishReview={() => { completeReview(activeLesson.sectionIndex); closeLesson(); }}
+        />
       )}
 
       {toast && (
@@ -280,7 +354,7 @@ function App() {
   );
 }
 
-function Header({ tab, xp }) {
+function Header({ tab, xp, streak }) {
   const titles = {
     home: 'GreenQuest',
     challenges: 'Challenges',
@@ -298,103 +372,152 @@ function Header({ tab, xp }) {
         </div>
       </div>
       <div className="top-actions">
-        <div className="xp-pill"><Zap size={15} fill="currentColor" /> {xp.toLocaleString()}</div>
+        <div className="stat-pill streak"><Flame size={15} fill="currentColor" /> {streak}</div>
+        <div className="stat-pill gems"><Gem size={15} fill="currentColor" /> {xp.toLocaleString()}</div>
         <button className="icon-button" aria-label="Notifications"><Bell size={20} /></button>
       </div>
     </header>
   );
 }
 
-function HomeScreen({ xp, completedMission, onOpenMission, onOpenChallenge, onChangeTab, journey, onCompleteWorld, onOpenWorld, onDailyCheckin, showToast }) {
+function RoadmapScreen({ roadmap, isLessonUnlocked, isLessonDone, isReviewUnlocked, isReviewDone, isSectionUnlocked, onOpenLesson, onOpenReview }) {
+  const totalNodes = roadmapSections.length * 6;
+  const doneNodes = roadmap.completedLessons.length + roadmap.completedReviews.length;
+
+  let current = null;
+  for (let sIndex = 0; sIndex < roadmapSections.length && !current; sIndex++) {
+    if (!isSectionUnlocked(sIndex)) break;
+    const section = roadmapSections[sIndex];
+    const lessonIndex = section.lessons.findIndex((l) => !isLessonDone(section.id, l.id));
+    if (lessonIndex !== -1) {
+      current = { kind: 'lesson', sectionIndex: sIndex, lessonIndex, title: section.lessons[lessonIndex].title, label: `SECTION ${section.id} · LESSON ${lessonIndex + 1}/5` };
+    } else if (!isReviewDone(section.id)) {
+      current = { kind: 'review', sectionIndex: sIndex, title: section.review.title, label: `SECTION ${section.id} · REVIEW` };
+    }
+  }
+
+  const jumpToCurrent = () => {
+    document.querySelector('.road-node.current')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
   return (
-    <div className="page-stack">
-      <section>
-        <SectionHeading title="Green Journey" action="Explore" onAction={() => showToast('Open Journey map from Passport')} />
-        <div className="journey-row">
-          {worlds.map((w) => {
-            const locked = !journey.unlocked.includes(w.id);
-            const done = journey.completed.includes(w.id);
-            const Icon = w.icon;
-            return (
-              <button
-                key={w.id}
-                className={`world-node ${locked ? 'locked' : ''}`}
-                onClick={() => {
-                  if (locked) return showToast('Unlock previous world to access');
-                  return onOpenWorld ? onOpenWorld(w) : onCompleteWorld(w);
-                }}
-              >
-                <div className="world-icon"><Icon size={24} /></div>
-                <div className="world-title">{w.title}</div>
-                <div className="world-meta">{w.desc}</div>
-                {done && <div style={{ marginTop: 10 }} className="badge-pill"><BadgeCheck size={14} /> {w.badge}</div>}
-              </button>
-            );
-          })}
-        </div>
-      </section>
-      <section className="welcome-card">
-        <div className="welcome-copy">
-          <p className="eyebrow light">GOOD AFTERNOON</p>
-          <h2>Ready to make an impact, Dara?</h2>
-          <div className="level-row">
-            <span>Green Explorer · Level 12</span>
-            <strong>{xp % 100}/100 XP</strong>
-          </div>
-          <div className="progress-track dark"><span style={{ width: `${xp % 100}%` }} /></div>
-        </div>
-        <div className="planet-badge" aria-hidden="true">🌍</div>
-      </section>
-
-      <section>
-        <SectionHeading title="Your impact" action="View passport" onAction={() => onChangeTab('passport')} />
-        <div className="impact-grid">
-          <ImpactCard icon={Recycle} value="12.5 kg" label="Plastic reduced" />
-          <ImpactCard icon={Clock3} value="18 hrs" label="Volunteer time" />
-          <ImpactCard icon={Sprout} value="7" label="Trees planted" />
-        </div>
-      </section>
-
-      <section className="daily-card">
-        <div className="daily-topline">
-          <span className="tag amber"><Flame size={14} /> DAILY MISSION</span>
-          <span className="streak">🔥 14-day streak</span>
-        </div>
-        <div className="daily-content">
-          <div className="mission-icon"><Recycle size={28} /></div>
-          <div className="daily-copy">
-            <h3>{completedMission ? 'Mission completed!' : 'Sort It Right'}</h3>
-            <p>{completedMission ? 'Your Green Passport has been updated.' : 'Learn how to separate common household waste.'}</p>
-            <span><Zap size={14} fill="currentColor" /> {completedMission ? '150 XP earned' : '+150 XP · 4 minutes'}</span>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-          <button className="primary-button" style={{ flex: 1 }} onClick={onOpenMission}>
-            {completedMission ? 'Review mission' : 'Start mission'} <Play size={17} fill="currentColor" />
+    <div className="page-stack roadmap-page">
+      <section className="roadmap-banner">
+        {current ? (
+          <button
+            className="roadmap-banner-inner"
+            onClick={() => (current.kind === 'lesson' ? onOpenLesson(current.sectionIndex, current.lessonIndex) : onOpenReview(current.sectionIndex))}
+          >
+            <div>
+              <p className="roadmap-banner-eyebrow">{current.label}</p>
+              <h2>{current.title}</h2>
+            </div>
+            <span className="roadmap-banner-go"><ChevronRight size={20} /></span>
           </button>
-          <button className="checkin-button" onClick={() => onDailyCheckin && onDailyCheckin()}>
-            Check in
-          </button>
-        </div>
-      </section>
-
-      <section>
-        <SectionHeading title="Featured challenge" action="See all" onAction={() => onChangeTab('challenges')} />
-        <ChallengeCard challenge={challenges[0]} onClick={() => onOpenChallenge(challenges[0])} featured />
-      </section>
-
-      <section>
-        <SectionHeading title="Opportunities for you" />
-        <div className="opportunity-card">
-          <div className="opportunity-icon"><GraduationCap size={24} /></div>
-          <div>
-            <span className="tag soft">GREEN INNOVATION</span>
-            <h3>Pitch your climate solution</h3>
-            <p>Win mentorship and a scholarship interview.</p>
+        ) : (
+          <div className="roadmap-banner-inner static">
+            <div>
+              <p className="roadmap-banner-eyebrow">ALL SECTIONS COMPLETE</p>
+              <h2>You finished the whole path! 🎉</h2>
+            </div>
           </div>
-          <ChevronRight size={22} />
+        )}
+        <div className="roadmap-banner-progress">
+          <div className="progress-track"><span style={{ width: `${(doneNodes / totalNodes) * 100}%` }} /></div>
+          <span>{doneNodes}/{totalNodes} steps</span>
         </div>
       </section>
+
+      {roadmapSections.map((section, sectionIndex) => (
+        <RoadmapSection
+          key={section.id}
+          section={section}
+          sectionIndex={sectionIndex}
+          unlocked={isSectionUnlocked(sectionIndex)}
+          decor={roadmapDecor[sectionIndex % roadmapDecor.length]}
+          isLessonUnlocked={isLessonUnlocked}
+          isLessonDone={isLessonDone}
+          isReviewUnlocked={isReviewUnlocked}
+          isReviewDone={isReviewDone}
+          onOpenLesson={onOpenLesson}
+          onOpenReview={onOpenReview}
+        />
+      ))}
+
+      <div className="jump-fab-wrap">
+        <span className="jump-fab-tip">CONTINUE?</span>
+        <button className="jump-fab" onClick={jumpToCurrent} aria-label="Jump to current lesson">
+          <ArrowDown size={22} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function RoadmapSection({ section, sectionIndex, unlocked, decor, isLessonUnlocked, isLessonDone, isReviewUnlocked, isReviewDone, onOpenLesson, onOpenReview }) {
+  const Icon = section.icon;
+  const lessonsDone = section.lessons.filter((l) => isLessonDone(section.id, l.id)).length;
+  const reviewDone = isReviewDone(section.id);
+  const positions = ['pos-c', 'pos-r', 'pos-l', 'pos-r', 'pos-c'];
+
+  return (
+    <section className={`roadmap-section ${unlocked ? '' : 'locked'}`}>
+      <div className="roadmap-section-head">
+        <div className={`roadmap-section-icon ${section.tone}`}><Icon size={20} /></div>
+        <div className="roadmap-section-copy">
+          <h3>Section {section.id} · {section.title}</h3>
+          <p>{section.desc}</p>
+        </div>
+        <span className="roadmap-section-count">{lessonsDone}/5</span>
+      </div>
+
+      {!unlocked && (
+        <div className="roadmap-lock-banner">
+          <LockKeyhole size={16} /> Complete Section {section.id - 1}'s review to unlock
+        </div>
+      )}
+
+      {unlocked && (
+        <div className="road-path" style={{ minHeight: 560 }}>
+          {decor.map((d, i) => (
+            <span key={i} className="road-deco" style={{ top: `${d.t}%`, left: `${d.l}%` }} aria-hidden="true">{d.e}</span>
+          ))}
+          {section.lessons.map((lesson, lessonIndex) => (
+            <RoadmapNode
+              key={lesson.id}
+              position={positions[lessonIndex]}
+              icon={BookOpen}
+              done={isLessonDone(section.id, lesson.id)}
+              locked={!isLessonUnlocked(sectionIndex, lessonIndex)}
+              current={isLessonUnlocked(sectionIndex, lessonIndex) && !isLessonDone(section.id, lesson.id)}
+              onClick={() => onOpenLesson(sectionIndex, lessonIndex)}
+            />
+          ))}
+          <RoadmapNode
+            position="pos-c"
+            icon={Trophy}
+            review
+            done={reviewDone}
+            locked={!isReviewUnlocked(sectionIndex)}
+            current={isReviewUnlocked(sectionIndex) && !reviewDone}
+            onClick={() => onOpenReview(sectionIndex)}
+          />
+        </div>
+      )}
+    </section>
+  );
+}
+
+function RoadmapNode({ position, icon: Icon, done, locked, current, review, onClick }) {
+  return (
+    <div className={`road-node-wrap ${position}`}>
+      <button
+        className={`road-node ${review ? 'review' : ''} ${done ? 'done' : ''} ${locked ? 'locked' : ''} ${current ? 'current' : ''}`}
+        onClick={onClick}
+      >
+        {done ? <Check size={review ? 26 : 20} /> : locked ? <LockKeyhole size={review ? 22 : 17} /> : <Icon size={review ? 26 : 20} />}
+      </button>
+      {current && <span className="road-node-caption">{review ? 'REVIEW' : 'START'}</span>}
     </div>
   );
 }
@@ -575,7 +698,7 @@ function PassportScreen({ xp, showToast }) {
             );
           })}
           {/* show earned badges from journey */}
-          {JSON.parse(localStorage.getItem('green_journey') || '{}').badges?.map((b) => (
+          {JSON.parse(localStorage.getItem('greenquest_roadmap') || '{}').badges?.map((b) => (
             <div className="badge-row" key={b}>
               <div className="badge-symbol"><Medal size={22} /></div>
               <div><strong>{b}</strong><span>Earned in your journey</span></div>
@@ -640,6 +763,117 @@ function ChallengeSheet({ challenge, onClose, onStart }) {
           <button className="primary-button full" onClick={onStart}>Join challenge <ChevronRight size={18} /></button>
         </div>
       </article>
+    </div>
+  );
+}
+
+function LessonFlow({ section, kind, lessonIndex, onClose, onFinishLesson, onFinishReview }) {
+  const questions = kind === 'lesson' ? [section.lessons[lessonIndex]] : section.review.questions;
+  const [step, setStep] = useState(0);
+  const [done, setDone] = useState(false);
+  const total = questions.length;
+  const title = kind === 'lesson' ? section.lessons[lessonIndex].title : section.review.title;
+  const xp = kind === 'lesson' ? section.lessonXp : section.review.xp;
+
+  const handleContinue = () => {
+    if (step + 1 < total) setStep(step + 1);
+    else setDone(true);
+  };
+
+  const handleFinish = () => (kind === 'lesson' ? onFinishLesson() : onFinishReview());
+
+  return (
+    <div className="mission-modal">
+      <div className="mission-topbar">
+        <button className="icon-button" onClick={onClose}><ArrowLeft size={20} /></button>
+        <div className="mission-progress">
+          <span>{done ? title : `Question ${step + 1} of ${total}`}</span>
+          <div className="progress-track"><span style={{ width: `${done ? 100 : (step / total) * 100}%` }} /></div>
+        </div>
+        <button className="icon-button" onClick={onClose}><X size={20} /></button>
+      </div>
+
+      <div className="mission-screen">
+        {!done && (
+          <LessonQuizStep key={step} question={questions[step]} onContinue={handleContinue} />
+        )}
+        {done && (
+          <div className="complete-layout">
+            <div className="completion-rings">
+              <div className="completion-icon">{kind === 'review' ? <Trophy size={50} /> : <BadgeCheck size={50} />}</div>
+            </div>
+            <span className="tag amber">{kind === 'review' ? 'SECTION COMPLETE' : 'LESSON COMPLETE'}</span>
+            <h2>{title} done!</h2>
+            <p>{kind === 'review' ? `You unlocked the next section and earned the "${section.review.badge}" badge.` : 'Nice work — keep the path going.'}</p>
+            <div className="reward-card">
+              <div><Zap size={22} fill="currentColor" /><strong>+{xp} XP</strong><span>{kind === 'review' ? 'Review reward' : 'Lesson reward'}</span></div>
+              {kind === 'review' ? (
+                <div><Trophy size={22} fill="currentColor" /><strong>Badge</strong><span>{section.review.badge}</span></div>
+              ) : (
+                <div><Star size={22} fill="currentColor" /><strong>Step {lessonIndex + 1}/5</strong><span>{section.title}</span></div>
+              )}
+            </div>
+            <button className="primary-button full" onClick={handleFinish}>Continue <ChevronRight size={18} /></button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function LessonQuizStep({ question, onContinue }) {
+  const [answer, setAnswer] = useState(null);
+  const [checked, setChecked] = useState(false);
+  const isCorrect = answer === question.correct;
+
+  const submit = () => {
+    if (answer === null) return;
+    if (!checked) setChecked(true);
+    else if (isCorrect) onContinue();
+  };
+
+  return (
+    <div className="quiz-layout">
+      <div className="quiz-visual">{question.visual}</div>
+      <div>
+        <span className="tag soft"><BookOpen size={13} /> QUICK QUIZ</span>
+        <h2>{question.question}</h2>
+      </div>
+      <div className="answer-list">
+        {question.answers.map((item, index) => {
+          const selected = answer === index;
+          const state = checked && selected ? (isCorrect ? 'correct' : 'wrong') : '';
+          return (
+            <button
+              key={item}
+              className={`answer-button ${selected ? 'selected' : ''} ${state}`}
+              onClick={() => { if (!checked) setAnswer(index); }}
+            >
+              <span>{String.fromCharCode(65 + index)}</span>
+              {item}
+              {checked && selected && (isCorrect ? <Check size={20} /> : <X size={20} />)}
+            </button>
+          );
+        })}
+      </div>
+
+      {checked && (
+        <div className={`feedback-box ${isCorrect ? 'success' : 'error'}`}>
+          {isCorrect ? <BadgeCheck size={21} /> : <X size={21} />}
+          <div>
+            <strong>{isCorrect ? 'Great job!' : 'Not quite yet'}</strong>
+            <p>{isCorrect ? 'Correct answer.' : 'Review the choices and try again.'}</p>
+          </div>
+        </div>
+      )}
+
+      <button
+        className="primary-button full mission-cta"
+        disabled={answer === null}
+        onClick={checked && !isCorrect ? () => { setChecked(false); setAnswer(null); } : submit}
+      >
+        {checked ? (isCorrect ? 'Continue' : 'Try again') : 'Check answer'} <ChevronRight size={18} />
+      </button>
     </div>
   );
 }
@@ -837,16 +1071,6 @@ function SectionHeading({ title, action, onAction }) {
     <div className="section-heading">
       <h2>{title}</h2>
       {action && <button onClick={onAction}>{action} <ChevronRight size={16} /></button>}
-    </div>
-  );
-}
-
-function ImpactCard({ icon: Icon, value, label }) {
-  return (
-    <div className="impact-card">
-      <div className="impact-icon"><Icon size={19} /></div>
-      <strong>{value}</strong>
-      <span>{label}</span>
     </div>
   );
 }
